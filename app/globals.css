@@ -5,8 +5,14 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff;
+    --foreground: #171717;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
   }
 }
 
@@ -24,6 +30,32 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.page{
+  --gray-rgb: 0, 0, 0;
+  --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
+  --gray-alpha-100: rgba(var(--gray-rgb), 0.05);
+  
+  --button-primary-hover: #383838;
+  --button-secondary-hover: #f2f2f2;
+  
+  font-family: var(--font-geist-sans);
+  background-color: #f2f2f2;
+  
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  /* max-height: 1200px; */
+  width: 100vw;
+  /* margin: 30px auto; */
+  position: relative;
+  /* 
+  min-height: 100svh;
+  align-items: center;
+  justify-items: center;
+  gap: 64px;
+  */
+}
+
 * {
   box-sizing: border-box;
   padding: 0;
@@ -33,6 +65,110 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+.main-form-head {
+  display: flex;
+}
+
+.navigation {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center; /* Vertically align buttons */
+  background-color: #1a1a1a;
+  color: #fff;
+  padding: 5px;
+}
+
+.navigation-logo button{
+  background-color: #1a1a1a;
+  border: 0;
+  cursor: pointer;
+  color: #fff;
+}
+
+.navigation-options {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end; /* Aligns the buttons to the right */
+  margin-left: auto;
+}
+
+.navigation-options button {
+  padding: 8px 20px;
+  background-color: #b60a8b;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Button Hover Effect */
+.navigation-options button:hover {
+  background-color: #ff1a1a;
+  transform: scale(1.05);
+}
+
+/* Active Button Style (Optional for when a section is active) */
+.navigation-options button.active {
+  background-color: #00b3b3;
+  transform: scale(1.05);
+}
+
+.channel-selection {
+  padding: 10px 5px;
+}
+
+.channel-container {
+  position: absolute;
+  bottom: 0;
+}
+
+.channel-log {
+  max-height: 450px;
+  margin-bottom: 20px;
+  overflow-y: auto;
+}
+
+.new-input-section {
+  min-height: 200px;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  position: relative;
+  max-width: 500px;
+  width: 100%;
+}
+
+.modal-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
 }
 
 @media (prefers-color-scheme: dark) {
