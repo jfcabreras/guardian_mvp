@@ -8,6 +8,11 @@ import {
   addDoc,
   getDocs,
   serverTimestamp,
+  query,
+  orderBy,
+  doc,
+  updateDoc,
+  arrayUnion,
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
@@ -16,17 +21,22 @@ const Main = ({ setSelectedSection, user }) => {
   const currentUserUid = auth.currentUser?.uid;
   const [reports, setReports] = useState([]);
   const [showNewReportModal, setShowNewReportModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState('');
   const [message, setMessage] = useState('');
   const [file, setFile] = useState(null);
   const [filePreviewUrl, setFilePreviewUrl] = useState('');
-  const [location, setLocation] = useState(null); // Assuming you still want location
+  const [location, setLocation] = useState(null);
+  const [expandedComments, setExpandedComments] = useState({});
+  const [commentInputs, setCommentInputs] = useState({});
   const fileInputRef = useRef(null);
 
   // Fetch reports on mount
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const snapshot = await getDocs(collection(db, "reports"));
+        const q = query(collection(db, "reports"), orderBy("timestamp", "desc"));
+        const snapshot = await getDocs(q);
         const j_reports = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
@@ -61,14 +71,14 @@ const Main = ({ setSelectedSection, user }) => {
     e.preventDefault();
 
     if (!file || !message.trim()) {
-      alert("Please provide a file, summary, and allow location access.");
+      alert("Please provide a file and summary.");
       return;
     }
 
     try {
       const uploadedUrl = await uploadToStorage(file, 'files');
 
-      await addDoc(collection(db, "reports"), {
+      const newReport = await addDoc(collection(db, "reports"), {
         sender: currentUserUid,
         type: 'file',
         message,
@@ -76,8 +86,23 @@ const Main = ({ setSelectedSection, user }) => {
         filename: file.name,
         category: 'undefined',
         timestamp: serverTimestamp(),
-        location
+        location,
+        comments: []
       });
+
+      // Add to local state immediately for better UX
+      setReports(prev => [{
+        id: newReport.id,
+        sender: currentUserUid,
+        type: 'file',
+        message,
+        fileUrl: uploadedUrl,
+        filename: file.name,
+        category: 'undefined',
+        timestamp: { toDate: () => new Date() },
+        location,
+        comments: []
+      }, ...prev]);
 
       // Reset form
       setMessage('');
@@ -90,85 +115,219 @@ const Main = ({ setSelectedSection, user }) => {
     }
   };
 
+  // Add comment to report
+  const handleAddComment = async (reportId) => {
+    const commentText = commentInputs[reportId];
+    if (!commentText?.trim() || !user) return;
+
+    try {
+      const reportRef = doc(db, "reports", reportId);
+      const newComment = {
+        id: uuidv4(),
+        text: commentText.trim(),
+        author: user.email,
+        timestamp: new Date().toISOString(),
+        userId: currentUserUid
+      };
+
+      await updateDoc(reportRef, {
+        comments: arrayUnion(newComment)
+      });
+
+      // Update local state
+      setReports(prev => prev.map(report => 
+        report.id === reportId 
+          ? { ...report, comments: [...(report.comments || []), newComment] }
+          : report
+      ));
+
+      // Clear input
+      setCommentInputs(prev => ({ ...prev, [reportId]: '' }));
+    } catch (error) {
+      console.error("Error adding comment:", error);
+    }
+  };
+
+  // Toggle comments visibility
+  const toggleComments = (reportId) => {
+    setExpandedComments(prev => ({
+      ...prev,
+      [reportId]: !prev[reportId]
+    }));
+  };
+
+  // Handle comment input change
+  const handleCommentInputChange = (reportId, value) => {
+    setCommentInputs(prev => ({
+      ...prev,
+      [reportId]: value
+    }));
+  };
+
+  // Open image in modal
+  const openImageInModal = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setShowImageModal(true);
+  };
+
   const handleOpenModal = () => {
     setShowNewReportModal(true);
   };
 
   return (
-    <div className="main-section" style={{ padding: '20px' }}>
+    <div className="main-section">
       <div className='report-log'>
         {reports.length < 1 ? (
-          <div>No Reports to Display Yet</div>
+          <div className="empty-state">
+            <div className="empty-state-icon">📱</div>
+            <h3>No Reports Yet</h3>
+            <p>Be the first to report something in your area</p>
+          </div>
         ) : (
           reports.map((report) => (
             <div key={report.id} className="report-container">
-              {/* <pre>{JSON.stringify(report, null, 2)}</pre> */}
-              <p className="preview-row-field"><small>{report.timestamp?.toDate().toLocaleString()}</small></p>
-              <img
-                src={report.fileUrl}
-                alt={report.filename || 'Image'}
-                style={{
-                  maxWidth: '70px',
-                  maxHeight: '70px',
-                  objectFit: 'cover',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  marginBottom: '4px',
-                }}
-                onClick={() => openImageInModal(report.fileUrl)} // Clicking opens the modal
-              />
-              <h3>{report.message}</h3>
+              <div className="report-header">
+                <img
+                  src={report.fileUrl}
+                  alt={report.filename || 'Report image'}
+                  className="report-image"
+                  onClick={() => openImageInModal(report.fileUrl)}
+                />
+                <div className="report-content">
+                  <div className="report-timestamp">
+                    {report.timestamp?.toDate ? report.timestamp.toDate().toLocaleString() : 'Just now'}
+                  </div>
+                  <h3 className="report-message">{report.message}</h3>
+                  <span className="report-status">Active</span>
+                </div>
+              </div>
+
+              {/* Comments Section */}
+              {user?.emailVerified && (
+                <div className="comments-section">
+                  <button 
+                    className="comments-toggle"
+                    onClick={() => toggleComments(report.id)}
+                  >
+                    💬 {report.comments?.length || 0} Comments
+                    {expandedComments[report.id] ? ' ▲' : ' ▼'}
+                  </button>
+
+                  {expandedComments[report.id] && (
+                    <>
+                      {/* Existing Comments */}
+                      {report.comments?.map((comment) => (
+                        <div key={comment.id} className="comment-item">
+                          <div className="comment-author">{comment.author}</div>
+                          <div>{comment.text}</div>
+                        </div>
+                      ))}
+
+                      {/* Add Comment Form */}
+                      <div className="comment-form">
+                        <input
+                          type="text"
+                          placeholder="Add a comment..."
+                          value={commentInputs[report.id] || ''}
+                          onChange={(e) => handleCommentInputChange(report.id, e.target.value)}
+                          className="comment-input"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              handleAddComment(report.id);
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleAddComment(report.id)}
+                          className="comment-submit"
+                          disabled={!commentInputs[report.id]?.trim()}
+                        >
+                          Post
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           ))
         )}
       </div>
 
-      {user?.emailVerified && (
-        <>
-          {showNewReportModal && (
-            <div className="modal-overlay" onClick={() => setShowNewReportModal(false)}>
-              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <button className="modal-close" onClick={() => setShowNewReportModal(false)}>×</button>
-                <h3>Create New Report</h3>
+      {/* Image Modal */}
+      {showImageModal && (
+        <div className="image-modal" onClick={() => setShowImageModal(false)}>
+          <button className="image-modal-close" onClick={() => setShowImageModal(false)}>×</button>
+          <img src={selectedImage} alt="Full size" />
+        </div>
+      )}
 
-                {/* Local Preview */}
-                <div style={{ marginBottom: '10px' }}>
-                  {filePreviewUrl && (
-                    <>
-                      {file.type.startsWith('image/') && (
-                        <img src={filePreviewUrl} alt="preview" style={{ maxWidth: '100%', maxHeight: '200px' }} />
-                      )}
-                      {file.type.startsWith('video/') && (
-                        <video controls src={filePreviewUrl} style={{ maxWidth: '100%', maxHeight: '200px' }} />
-                      )}
-                    </>
-                  )}
-                </div>
+      {/* New Report Modal */}
+      {showNewReportModal && (
+        <div className="modal-overlay" onClick={() => setShowNewReportModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowNewReportModal(false)}>×</button>
+            <h3 className="modal-title">Report Incident</h3>
 
-                <form onSubmit={handleSubmitReport}>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*,video/*"
-                    onChange={handleFileChange}
-                    style={{ marginBottom: '10px' }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Summary"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    style={{ width: '100%', marginBottom: '10px', padding: '8px' }}
-                  />
-                  <button type="submit" disabled={!file || !message }>
-                    Submit Report
-                  </button>
-                </form>
+            {/* Local Preview */}
+            {filePreviewUrl && (
+              <div className="file-preview">
+                {file?.type.startsWith('image/') && (
+                  <img src={filePreviewUrl} alt="preview" />
+                )}
+                {file?.type.startsWith('video/') && (
+                  <video controls src={filePreviewUrl} />
+                )}
               </div>
-            </div>
-          )}
-          <button onClick={handleOpenModal}>+ Create Report</button>
-        </>
+            )}
+
+            <form onSubmit={handleSubmitReport}>
+              <div className="form-group">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,video/*"
+                  onChange={handleFileChange}
+                  className="form-input"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <textarea
+                  placeholder="What's happening? Describe the incident..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="form-textarea"
+                  required
+                />
+              </div>
+              <button 
+                type="submit" 
+                disabled={!file || !message.trim()}
+                className="form-button"
+              >
+                Submit Report
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Action Button - only show if user is verified */}
+      {user?.emailVerified && (
+        <button onClick={handleOpenModal} className="fab" title="Create Report">
+          +
+        </button>
+      )}
+
+      {/* Login prompt for non-verified users */}
+      {!user?.emailVerified && (
+        <div className="login-prompt">
+          <button onClick={() => setSelectedSection('login')}>
+            📱 Login to Report Incidents
+          </button>
+        </div>
       )}
     </div>
   );

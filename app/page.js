@@ -145,30 +145,44 @@ export default function Home() {
           return <Main router={router} setSelectedSection={setSelectedSection} user={user}/>;
         case 'contribute':
           return <Contribute setSelectedSection={setSelectedSection} />;
+        case 'login':
+          setShowLoginModal(true);
+          setSelectedSection('main');
+          return <Main router={router} setSelectedSection={setSelectedSection} user={user}/>;
         default:
           return <Main router={router} setSelectedSection={setSelectedSection} user={user}/>;
       }
     };
 
-    if (user && user.emailVerified) {
-      return renderSection();
-    } else {
-      return (
-        <>
-          <button onClick={() => setShowLoginModal(true)}>Please Login or Register</button>
-          {user && !user.emailVerified && (
-            <div>
-              <p>Your email is not verified yet.</p>
-              <p>If you already clicked the verification link, just reload the page.</p>
-              <p>or</p>
-              <button onClick={handleResendVerification}>Resend Verification Email</button>
-            </div>
-          )}
-          {/* Optionally still render the section for unverified users */}
-          {renderSection()}
-        </>
-      );
-    }
+    return (
+      <>
+        {user && !user.emailVerified && (
+          <div style={{ 
+            padding: '16px', 
+            background: '#fef3c7', 
+            color: '#92400e',
+            textAlign: 'center',
+            fontSize: '14px'
+          }}>
+            <p>📧 Please verify your email to report incidents</p>
+            <button 
+              onClick={handleResendVerification}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#dc2626',
+                textDecoration: 'underline',
+                cursor: 'pointer',
+                marginTop: '4px'
+              }}
+            >
+              Resend verification email
+            </button>
+          </div>
+        )}
+        {renderSection()}
+      </>
+    );
   };
 
 
