@@ -218,24 +218,19 @@ const Main = ({ setSelectedSection, user }) => {
         ) : (
           reports.map((report) => (
             <div key={report.id} className="feed-item">
-              {/* Feed Header */}
-              <div className="feed-header">
-                <div className="feed-status">🔴 ACTIVE</div>
-                <div className="feed-time">
-                  {report.timestamp?.toDate ? report.timestamp.toDate().toLocaleString() : 'Just now'}
-                </div>
-              </div>
-              
-              {/* Feed Image */}
               <div className="feed-image-container" onClick={() => openFullScreenImage(report)}>
                 <img
                   src={report.fileUrl}
                   alt={report.filename || 'Report image'}
                   className="feed-image"
                 />
+                <div className="feed-overlay">
+                  <div className="feed-status">🔴 ACTIVE</div>
+                  <div className="feed-time">
+                    {report.timestamp?.toDate ? report.timestamp.toDate().toLocaleString() : 'Just now'}
+                  </div>
+                </div>
               </div>
-              
-              {/* Feed Content */}
               <div className="feed-content">
                 <h3 className="feed-message">{report.message}</h3>
                 <div className="feed-actions">
