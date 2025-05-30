@@ -13,6 +13,7 @@
     "@capacitor/camera": "^7.0.1",
     "@capacitor/core": "^7.2.0",
     "@capacitor/filesystem": "^7.1.1",
+    "@capacitor/geolocation": "^7.1.2",
     "@capacitor/ios": "^7.2.0",
     "capacitor-voice-recorder": "^7.0.5",
     "firebase": "^11.8.1",

@@ -18,6 +18,7 @@
 
 html,
 body {
+  /* max-width: 100vw; */
   max-width: 100vw;
   overflow-x: hidden;
 }
@@ -169,6 +170,21 @@ a {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
+}
+
+.report-log {
+  min-height: 400px;
+  max-height: 800px;
+  margin-bottom: 20px;
+  overflow-y: auto;
+}
+
+.report-container {
+  margin: 0;
+  border-top: 1px solid #969494; /* Adding a border style */
+  border-radius: 0px; /* Rounded corners */
+  padding: 5px;
+  height: 300px;
 }
 
 @media (prefers-color-scheme: dark) {

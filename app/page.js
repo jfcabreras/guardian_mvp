@@ -142,11 +142,11 @@ export default function Home() {
     const renderSection = () => {
       switch (selectedSection) {
         case 'main':
-          return <Main setSelectedSection={setSelectedSection} />;
+          return <Main router={router} setSelectedSection={setSelectedSection} user={user}/>;
         case 'contribute':
           return <Contribute setSelectedSection={setSelectedSection} />;
         default:
-          return <Main setSelectedSection={setSelectedSection} />;
+          return <Main router={router} setSelectedSection={setSelectedSection} user={user}/>;
       }
     };
 
@@ -155,7 +155,7 @@ export default function Home() {
     } else {
       return (
         <>
-          <button onClick={() => setShowLoginModal(true)}>Please Login.</button>
+          <button onClick={() => setShowLoginModal(true)}>Please Login or Register</button>
           {user && !user.emailVerified && (
             <div>
               <p>Your email is not verified yet.</p>
