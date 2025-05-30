@@ -118,7 +118,7 @@ const Main = ({ setSelectedSection, user }) => {
   // Add comment to report
   const handleAddComment = async (reportId) => {
     const commentText = commentInputs[reportId];
-    if (!commentText?.trim() || !user) return;
+    if (!commentText?.trim() || !user?.emailVerified) return;
 
     try {
       const reportRef = doc(db, "reports", reportId);
@@ -145,6 +145,28 @@ const Main = ({ setSelectedSection, user }) => {
       setCommentInputs(prev => ({ ...prev, [reportId]: '' }));
     } catch (error) {
       console.error("Error adding comment:", error);
+    }
+  };
+
+  // Delete comment
+  const handleDeleteComment = async (reportId, commentId) => {
+    try {
+      const report = reports.find(r => r.id === reportId);
+      const updatedComments = report.comments.filter(comment => comment.id !== commentId);
+      
+      const reportRef = doc(db, "reports", reportId);
+      await updateDoc(reportRef, {
+        comments: updatedComments
+      });
+
+      // Update local state
+      setReports(prev => prev.map(r => 
+        r.id === reportId 
+          ? { ...r, comments: updatedComments }
+          : r
+      ));
+    } catch (error) {
+      console.error("Error deleting comment:", error);
     }
   };
 
@@ -202,28 +224,42 @@ const Main = ({ setSelectedSection, user }) => {
                 </div>
               </div>
 
-              {/* Comments Section */}
-              {user?.emailVerified && (
-                <div className="comments-section">
-                  <button 
-                    className="comments-toggle"
-                    onClick={() => toggleComments(report.id)}
-                  >
-                    💬 {report.comments?.length || 0} Comments
-                    {expandedComments[report.id] ? ' ▲' : ' ▼'}
-                  </button>
+              {/* Comments Section - Always visible */}
+              <div className="comments-section">
+                <button 
+                  className="comments-toggle"
+                  onClick={() => toggleComments(report.id)}
+                >
+                  💬 {report.comments?.length || 0} Comments
+                  {expandedComments[report.id] ? ' ▲' : ' ▼'}
+                </button>
 
-                  {expandedComments[report.id] && (
-                    <>
-                      {/* Existing Comments */}
-                      {report.comments?.map((comment) => (
-                        <div key={comment.id} className="comment-item">
+                {expandedComments[report.id] && (
+                  <>
+                    {/* Existing Comments */}
+                    {report.comments?.map((comment) => (
+                      <div key={comment.id} className="comment-item">
+                        <div className="comment-header">
                           <div className="comment-author">{comment.author}</div>
-                          <div>{comment.text}</div>
+                          <div className="comment-timestamp">
+                            {new Date(comment.timestamp).toLocaleDateString()}
+                          </div>
+                          {currentUserUid === comment.userId && (
+                            <button
+                              className="comment-delete"
+                              onClick={() => handleDeleteComment(report.id, comment.id)}
+                              title="Delete comment"
+                            >
+                              🗑️
+                            </button>
+                          )}
                         </div>
-                      ))}
+                        <div className="comment-text">{comment.text}</div>
+                      </div>
+                    ))}
 
-                      {/* Add Comment Form */}
+                    {/* Add Comment Form - Only for verified users */}
+                    {user?.emailVerified ? (
                       <div className="comment-form">
                         <input
                           type="text"
@@ -246,10 +282,16 @@ const Main = ({ setSelectedSection, user }) => {
                           Post
                         </button>
                       </div>
-                    </>
-                  )}
-                </div>
-              )}
+                    ) : (
+                      <div className="comment-login-prompt">
+                        <button onClick={() => setSelectedSection('login')}>
+                          Login to comment
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           ))
         )}
