@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
@@ -22,7 +23,8 @@ const Main = ({ setSelectedSection, user }) => {
   const [reports, setReports] = useState([]);
   const [showNewReportModal, setShowNewReportModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
-  const [selectedImage, setSelectedImage] = useState('');
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [showReportDetails, setShowReportDetails] = useState(false);
   const [message, setMessage] = useState('');
   const [file, setFile] = useState(null);
   const [filePreviewUrl, setFilePreviewUrl] = useState('');
@@ -186,10 +188,18 @@ const Main = ({ setSelectedSection, user }) => {
     }));
   };
 
-  // Open image in modal
-  const openImageInModal = (imageUrl) => {
-    setSelectedImage(imageUrl);
+  // Open image in full screen modal
+  const openFullScreenImage = (report) => {
+    setSelectedReport(report);
     setShowImageModal(true);
+    setShowReportDetails(false);
+  };
+
+  // Close full screen modal
+  const closeFullScreenModal = () => {
+    setShowImageModal(false);
+    setSelectedReport(null);
+    setShowReportDetails(false);
   };
 
   const handleOpenModal = () => {
@@ -198,7 +208,7 @@ const Main = ({ setSelectedSection, user }) => {
 
   return (
     <div className="main-section">
-      <div className='report-log'>
+      <div className='report-feed'>
         {reports.length < 1 ? (
           <div className="empty-state">
             <div className="empty-state-icon">📱</div>
@@ -207,66 +217,72 @@ const Main = ({ setSelectedSection, user }) => {
           </div>
         ) : (
           reports.map((report) => (
-            <div key={report.id} className="report-container">
-              <div className="report-header">
+            <div key={report.id} className="feed-item">
+              <div className="feed-image-container" onClick={() => openFullScreenImage(report)}>
                 <img
                   src={report.fileUrl}
                   alt={report.filename || 'Report image'}
-                  className="report-image"
-                  onClick={() => openImageInModal(report.fileUrl)}
+                  className="feed-image"
                 />
-                <div className="report-content">
-                  <div className="report-timestamp">
+                <div className="feed-overlay">
+                  <div className="feed-status">🔴 ACTIVE</div>
+                  <div className="feed-time">
                     {report.timestamp?.toDate ? report.timestamp.toDate().toLocaleString() : 'Just now'}
                   </div>
-                  <h3 className="report-message">{report.message}</h3>
-                  <span className="report-status">Active</span>
                 </div>
               </div>
-
-              {/* Comments Section - Always visible */}
-              <div className="comments-section">
-                <button 
-                  className="comments-toggle"
-                  onClick={() => toggleComments(report.id)}
-                >
-                  💬 {report.comments?.length || 0} Comments
-                  {expandedComments[report.id] ? ' ▲' : ' ▼'}
-                </button>
-
+              <div className="feed-content">
+                <h3 className="feed-message">{report.message}</h3>
+                <div className="feed-actions">
+                  <button 
+                    className="feed-action-btn"
+                    onClick={() => toggleComments(report.id)}
+                  >
+                    💬 {report.comments?.length || 0}
+                  </button>
+                  <button className="feed-action-btn">
+                    🚨 Alert
+                  </button>
+                  <button className="feed-action-btn">
+                    📍 Location
+                  </button>
+                </div>
+                
+                {/* Compact Comments */}
                 {expandedComments[report.id] && (
-                  <>
-                    {/* Existing Comments */}
-                    {report.comments?.map((comment) => (
-                      <div key={comment.id} className="comment-item">
-                        <div className="comment-header">
-                          <div className="comment-author">{comment.author}</div>
-                          <div className="comment-timestamp">
-                            {new Date(comment.timestamp).toLocaleDateString()}
-                          </div>
-                          {currentUserUid === comment.userId && (
-                            <button
-                              className="comment-delete"
-                              onClick={() => handleDeleteComment(report.id, comment.id)}
-                              title="Delete comment"
-                            >
-                              🗑️
-                            </button>
-                          )}
-                        </div>
-                        <div className="comment-text">{comment.text}</div>
+                  <div className="feed-comments">
+                    {report.comments?.slice(0, 2).map((comment) => (
+                      <div key={comment.id} className="feed-comment">
+                        <span className="feed-comment-author">{comment.author}</span>
+                        <span className="feed-comment-text">{comment.text}</span>
+                        {currentUserUid === comment.userId && (
+                          <button
+                            className="feed-comment-delete"
+                            onClick={() => handleDeleteComment(report.id, comment.id)}
+                          >
+                            🗑️
+                          </button>
+                        )}
                       </div>
                     ))}
+                    
+                    {report.comments?.length > 2 && (
+                      <button 
+                        className="feed-view-more"
+                        onClick={() => openFullScreenImage(report)}
+                      >
+                        View all {report.comments.length} comments
+                      </button>
+                    )}
 
-                    {/* Add Comment Form - Only for verified users */}
                     {user?.emailVerified ? (
-                      <div className="comment-form">
+                      <div className="feed-comment-form">
                         <input
                           type="text"
                           placeholder="Add a comment..."
                           value={commentInputs[report.id] || ''}
                           onChange={(e) => handleCommentInputChange(report.id, e.target.value)}
-                          className="comment-input"
+                          className="feed-comment-input"
                           onKeyPress={(e) => {
                             if (e.key === 'Enter') {
                               handleAddComment(report.id);
@@ -276,20 +292,21 @@ const Main = ({ setSelectedSection, user }) => {
                         <button
                           type="button"
                           onClick={() => handleAddComment(report.id)}
-                          className="comment-submit"
+                          className="feed-comment-submit"
                           disabled={!commentInputs[report.id]?.trim()}
                         >
                           Post
                         </button>
                       </div>
                     ) : (
-                      <div className="comment-login-prompt">
-                        <button onClick={() => setSelectedSection('login')}>
-                          Login to comment
-                        </button>
-                      </div>
+                      <button 
+                        className="feed-login-btn"
+                        onClick={() => setSelectedSection('login')}
+                      >
+                        Login to comment
+                      </button>
                     )}
-                  </>
+                  </div>
                 )}
               </div>
             </div>
@@ -297,11 +314,95 @@ const Main = ({ setSelectedSection, user }) => {
         )}
       </div>
 
-      {/* Image Modal */}
-      {showImageModal && (
-        <div className="image-modal" onClick={() => setShowImageModal(false)}>
-          <button className="image-modal-close" onClick={() => setShowImageModal(false)}>×</button>
-          <img src={selectedImage} alt="Full size" />
+      {/* Full Screen Image Modal */}
+      {showImageModal && selectedReport && (
+        <div className="fullscreen-modal">
+          <button className="fullscreen-close" onClick={closeFullScreenModal}>×</button>
+          <div className="fullscreen-image-container">
+            <img src={selectedReport.fileUrl} alt="Full size" className="fullscreen-image" />
+          </div>
+          
+          {/* Report Details Tab */}
+          <div className={`report-details-tab ${showReportDetails ? 'expanded' : ''}`}>
+            <div className="tab-handle" onClick={() => setShowReportDetails(!showReportDetails)}>
+              <div className="tab-indicator"></div>
+              <div className="tab-preview">
+                <h4>{selectedReport.message}</h4>
+                <span>{selectedReport.comments?.length || 0} comments</span>
+              </div>
+              <div className="tab-arrow">{showReportDetails ? '▼' : '▲'}</div>
+            </div>
+            
+            {showReportDetails && (
+              <div className="tab-content">
+                <div className="report-full-details">
+                  <div className="report-meta">
+                    <div className="report-timestamp">
+                      {selectedReport.timestamp?.toDate ? selectedReport.timestamp.toDate().toLocaleString() : 'Just now'}
+                    </div>
+                    <span className="report-status-full">🔴 ACTIVE INCIDENT</span>
+                  </div>
+                  <h3 className="report-message-full">{selectedReport.message}</h3>
+                  
+                  {/* All Comments */}
+                  <div className="comments-section-full">
+                    <h4>Comments ({selectedReport.comments?.length || 0})</h4>
+                    {selectedReport.comments?.map((comment) => (
+                      <div key={comment.id} className="comment-full">
+                        <div className="comment-header-full">
+                          <span className="comment-author-full">{comment.author}</span>
+                          <span className="comment-time-full">
+                            {new Date(comment.timestamp).toLocaleDateString()}
+                          </span>
+                          {currentUserUid === comment.userId && (
+                            <button
+                              className="comment-delete-full"
+                              onClick={() => handleDeleteComment(selectedReport.id, comment.id)}
+                            >
+                              🗑️
+                            </button>
+                          )}
+                        </div>
+                        <p className="comment-text-full">{comment.text}</p>
+                      </div>
+                    ))}
+                    
+                    {user?.emailVerified ? (
+                      <div className="comment-form-full">
+                        <input
+                          type="text"
+                          placeholder="Add a comment..."
+                          value={commentInputs[selectedReport.id] || ''}
+                          onChange={(e) => handleCommentInputChange(selectedReport.id, e.target.value)}
+                          className="comment-input-full"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              handleAddComment(selectedReport.id);
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleAddComment(selectedReport.id)}
+                          className="comment-submit-full"
+                          disabled={!commentInputs[selectedReport.id]?.trim()}
+                        >
+                          Post
+                        </button>
+                      </div>
+                    ) : (
+                      <button 
+                        className="login-prompt-full"
+                        onClick={() => setSelectedSection('login')}
+                      >
+                        Login to comment
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -356,21 +457,18 @@ const Main = ({ setSelectedSection, user }) => {
         </div>
       )}
 
-      {/* Floating Action Button - only show if user is verified */}
-      {user?.emailVerified && (
-        <button onClick={handleOpenModal} className="fab" title="Create Report">
-          +
-        </button>
-      )}
-
-      {/* Login prompt for non-verified users */}
-      {!user?.emailVerified && (
-        <div className="login-prompt">
-          <button onClick={() => setSelectedSection('login')}>
-            📱 Login to Report Incidents
+      {/* Bottom Action Bar */}
+      <div className="bottom-action-bar">
+        {user?.emailVerified ? (
+          <button onClick={handleOpenModal} className="report-btn">
+            🚨 Report Incident
           </button>
-        </div>
-      )}
+        ) : (
+          <button onClick={() => setSelectedSection('login')} className="login-action-btn">
+            📱 Login to Report
+          </button>
+        )}
+      </div>
     </div>
   );
 };
