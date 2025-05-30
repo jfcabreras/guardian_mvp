@@ -81,10 +81,7 @@ body {
   font-size: 24px;
   font-weight: 800;
   margin: 0;
-  background: linear-gradient(135deg, var(--primary-purple), var(--danger-red));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #fff;
 }
 
 .navigation-options {
@@ -132,10 +129,10 @@ body {
 .report-feed {
   flex: 1;
   overflow-y: auto;
-  padding: 8px;
+  padding: 0; /* Remove padding to avoid interfering with full-screen layout */
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  scroll-snap-type: y mandatory; /* enables vertical snap scrolling */
   padding-bottom: 120px; /* Space for bottom action bar */
 }
 
@@ -147,7 +144,9 @@ body {
   overflow: hidden;
   box-shadow: var(--shadow);
   transition: all 0.2s ease;
-  margin-bottom: 8px;
+  height: 60vh; /* Nearly full screen height */
+  scroll-snap-align: start; /* snaps each item to top */
+  flex-shrink: 0; /* 👈 prevents it from shrinking */
 }
 
 .feed-item:hover {
@@ -158,7 +157,6 @@ body {
 .feed-image-container {
   position: relative;
   width: 100%;
-  height: 70vh; /* Use more screen space like TikTok */
   cursor: pointer;
   overflow: hidden;
   border-radius: 20px 20px 0 0;
@@ -377,7 +375,7 @@ body {
 
 /* Bottom Action Bar */
 .bottom-action-bar {
-  position: fixed;
+  /* position: fixed; */
   bottom: 0;
   left: 0;
   right: 0;
@@ -1122,7 +1120,7 @@ body {
 /* Footer */
 .footer {
   text-align: center;
-  padding: 32px 20px;
+  padding: 16px 20px;
   color: var(--text-muted);
   font-size: 14px;
   background: var(--surface);

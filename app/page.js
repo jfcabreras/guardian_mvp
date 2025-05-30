@@ -36,6 +36,7 @@ export default function Home() {
       if (user) {
         setUser(user);
         await checkVerificationStatus(user);
+        setShowLoginModal(false);
       } else {
         setUser(null);
       }
@@ -279,7 +280,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
 
       <main className="main">
         {renderSelectedSection()}
