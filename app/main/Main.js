@@ -56,9 +56,18 @@ const Main = ({ setSelectedSection, user }) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
 
+    const MAX_SIZE = 1073741824; // 1GB in bytes
+
+    if (selectedFile.size > MAX_SIZE) {
+      alert("File size exceeds 1GB. Please upload a smaller file.");
+      e.target.value = ""; // Reset file input
+      return;
+    }
+
     setFile(selectedFile);
     setFilePreviewUrl(URL.createObjectURL(selectedFile));
   };
+
 
   // Upload file to Firebase on submission
   const uploadToStorage = useCallback(async (file, pathPrefix) => {
@@ -332,7 +341,21 @@ const Main = ({ setSelectedSection, user }) => {
         <div className="fullscreen-modal">
           <button className="fullscreen-close" onClick={closeFullScreenModal}>×</button>
           <div className="fullscreen-image-container">
-            <img src={selectedReport.fileUrl} alt="Full size" className="fullscreen-image" />
+            {selectedReport.filename?.match(/\.(mp4|webm|ogg)$/i) ? (
+              <video
+                src={selectedReport.fileUrl}
+                className="fullscreen-image"
+                controls
+                autoPlay
+                playsInline
+              />
+            ) : (
+              <img
+                src={selectedReport.fileUrl}
+                alt="Full size"
+                className="fullscreen-image"
+              />
+            )}
           </div>
           
           {/* Report Details Tab */}
