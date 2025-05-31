@@ -219,13 +219,26 @@ const Main = ({ setSelectedSection, user }) => {
           reports.map((report) => (
             <div key={report.id} className="feed-item">
               <div className="feed-image-container" onClick={() => openFullScreenImage(report)}>
-                <img
-                  src={report.fileUrl}
-                  alt={report.filename || 'Report image'}
-                  className="feed-image"
-                />
+                {report.filename?.match(/\.(mp4|webm|ogg)$/i) ? (
+                  <>
+                  <video
+                    src={report.fileUrl}
+                    className="feed-image"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                  />
+                  </>
+                ) : (
+                  <img
+                    src={report.fileUrl}
+                    alt={report.filename || 'Report image'}
+                    className="feed-image"
+                  />
+                )}
                 <div className="feed-overlay">
-                  <div className="feed-status">🔴 ACTIVE</div>
+                  {/* <div className="feed-status">🔴 ACTIVE</div> */}
                   <div className="feed-time">
                     {report.timestamp?.toDate ? report.timestamp.toDate().toLocaleString() : 'Just now'}
                   </div>
@@ -240,9 +253,9 @@ const Main = ({ setSelectedSection, user }) => {
                   >
                     💬 {report.comments?.length || 0}
                   </button>
-                  <button className="feed-action-btn">
+                  {/* <button className="feed-action-btn">
                     🚨 Alert
-                  </button>
+                  </button> */}
                   <button className="feed-action-btn">
                     📍 Location
                   </button>
@@ -465,7 +478,7 @@ const Main = ({ setSelectedSection, user }) => {
           </button>
         ) : (
           <button onClick={() => setSelectedSection('login')} className="login-action-btn">
-            📱 Login to Report
+            Login to Report
           </button>
         )}
       </div>

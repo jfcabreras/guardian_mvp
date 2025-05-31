@@ -285,11 +285,11 @@ export default function Home() {
         {renderSelectedSection()}
       </main>
 
-      {!user && (
+      {/* {!user && (
         <footer className="footer">
           <p>Red Guardian - 2025</p>
         </footer>
-      )}
+      )} */}
     </div>
   );
 }

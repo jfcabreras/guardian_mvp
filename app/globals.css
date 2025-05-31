@@ -8,6 +8,8 @@
   --primary-purple-hover: #7c3aed;
   --danger-red: #ef4444;
   --danger-red-hover: #dc2626;
+  --cyber-purple: #b60a8b;
+  --cyber-purple-hover: #b60a8b;
   --success-green: #10b981;
   --warning-orange: #f59e0b;
   --border: #374151;
@@ -31,7 +33,7 @@ body {
   max-width: 100vw;
   overflow-x: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
-  background: var(--background);
+  background: var(--foreground);
   color: var(--foreground);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -42,7 +44,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: var(--background);
+  background: var(--foreground);
   position: relative;
 }
 
@@ -53,7 +55,7 @@ body {
   left: 0;
   right: 0;
   z-index: 1000;
-  background: var(--surface);
+  background: var(--background);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
   color: var(--text-primary);
@@ -74,12 +76,12 @@ body {
 }
 
 .navigation-logo button:hover {
-  color: var(--primary-purple);
+  color: var(--cyber-purple);
 }
 
 .navigation-logo h1 {
   font-size: 24px;
-  font-weight: 800;
+  font-weight: 600;
   margin: 0;
   color: #fff;
 }
@@ -102,15 +104,15 @@ body {
 }
 
 .navigation-options button:hover {
-  background: var(--primary-purple);
-  border-color: var(--primary-purple);
+  background: var(--cyber-purple);
+  border-color: var(--cyber-purple);
   transform: translateY(-1px);
 }
 
 /* Main Content */
 .main {
   flex: 1;
-  padding-top: 80px;
+  padding-top: 65px;
   padding-bottom: 0;
   height: 100vh;
   overflow: hidden;
@@ -120,7 +122,7 @@ body {
   height: calc(100vh - 80px);
   display: flex;
   flex-direction: column;
-  background: var(--background);
+  background: var(--foreground);
   position: relative;
   overflow: hidden;
 }
@@ -137,7 +139,7 @@ body {
 }
 
 .feed-item {
-  background: var(--surface);
+  background: var(--background);
   border: 1px solid var(--border);
   border-radius: 20px;
   position: relative;
@@ -178,7 +180,7 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 40%);
+  background: linear-gradient(0deg, transparent 0%, rgba(0,0,0,0.6) 20%, rgba(0,0,0,0.9) 100%);
   padding: 16px;
   display: flex;
   justify-content: space-between;
@@ -187,7 +189,7 @@ body {
 }
 
 .feed-status {
-  background: var(--danger-red);
+  background: var(--cyber-purple);
   color: white;
   padding: 6px 12px;
   border-radius: 20px;
@@ -210,7 +212,7 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0.9) 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.8) 20%, rgba(0,0,0,0.9) 100%);
   padding: 20px 16px 16px;
   color: white;
   z-index: 10;
@@ -294,7 +296,7 @@ body {
 }
 
 .feed-comment-delete:hover {
-  color: var(--danger-red);
+  color: var(--cyber-purple);
 }
 
 .feed-view-more {
@@ -308,7 +310,7 @@ body {
 }
 
 .feed-view-more:hover {
-  color: var(--primary-purple);
+  color: var(--cyber-purple);
 }
 
 .feed-comment-form {
@@ -330,13 +332,13 @@ body {
 }
 
 .feed-comment-input:focus {
-  border-color: var(--primary-purple);
+  border-color: var(--cyber-purple);
   box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
 }
 
 .feed-comment-submit {
   padding: 10px 16px;
-  background: var(--primary-purple);
+  background: var(--cyber-purple);
   color: white;
   border: none;
   border-radius: 20px;
@@ -347,7 +349,7 @@ body {
 }
 
 .feed-comment-submit:hover:not(:disabled) {
-  background: var(--primary-purple-hover);
+  background: var(--cyber-purple-hover);
 }
 
 .feed-comment-submit:disabled {
@@ -358,7 +360,7 @@ body {
 .feed-login-btn {
   width: 100%;
   padding: 12px;
-  background: var(--primary-purple);
+  background: var(--cyber-purple);
   color: white;
   border: none;
   border-radius: 20px;
@@ -370,16 +372,16 @@ body {
 }
 
 .feed-login-btn:hover {
-  background: var(--primary-purple-hover);
+  background: var(--cyber-purple-hover);
 }
 
 /* Bottom Action Bar */
 .bottom-action-bar {
-  /* position: fixed; */
+  position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  background: var(--surface);
+  background: var(--background);
   border-top: 1px solid var(--border);
   padding: 16px 20px;
   padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
@@ -391,7 +393,7 @@ body {
 .report-btn, .login-action-btn {
   width: 100%;
   padding: 14px 20px;
-  background: linear-gradient(135deg, var(--danger-red), var(--danger-red-hover));
+  background: linear-gradient(135deg, var(--cyber-purple), var(--cyber-purple-hover));
   color: white;
   border: none;
   border-radius: 12px;
@@ -404,7 +406,7 @@ body {
 }
 
 .login-action-btn {
-  background: linear-gradient(135deg, var(--primary-purple), var(--primary-purple-hover));
+  background: linear-gradient(135deg, var(--cyber-purple), var(--cyber-purple-hover));
 }
 
 .report-btn:hover, .login-action-btn:hover {
@@ -562,7 +564,7 @@ body {
 }
 
 .report-status-full {
-  background: var(--danger-red);
+  background: var(--cyber-purple);
   color: white;
   padding: 6px 12px;
   border-radius: 20px;
@@ -608,7 +610,7 @@ body {
 
 .comment-author-full {
   font-weight: 700;
-  color: var(--primary-purple);
+  color: var(--cyber-purple);
   font-size: 14px;
 }
 
@@ -629,7 +631,7 @@ body {
 }
 
 .comment-delete-full:hover {
-  background: var(--danger-red);
+  background: var(--cyber-purple);
   color: white;
 }
 
@@ -659,13 +661,13 @@ body {
 }
 
 .comment-input-full:focus {
-  border-color: var(--primary-purple);
+  border-color: var(--cyber-purple);
   box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
 }
 
 .comment-submit-full {
   padding: 12px 20px;
-  background: var(--primary-purple);
+  background: var(--cyber-purple);
   color: white;
   border: none;
   border-radius: 20px;
@@ -676,7 +678,7 @@ body {
 }
 
 .comment-submit-full:hover:not(:disabled) {
-  background: var(--primary-purple-hover);
+  background: var(--cyber-purple-hover);
 }
 
 .comment-submit-full:disabled {
@@ -687,7 +689,7 @@ body {
 .login-prompt-full {
   width: 100%;
   padding: 12px;
-  background: var(--primary-purple);
+  background: var(--cyber-purple);
   color: white;
   border: none;
   border-radius: 20px;
@@ -699,7 +701,7 @@ body {
 }
 
 .login-prompt-full:hover {
-  background: var(--primary-purple-hover);
+  background: var(--cyber-purple-hover);
 }
 
 /* Comments Section */
@@ -726,7 +728,7 @@ body {
 
 .comments-toggle:hover {
   background: var(--surface);
-  color: var(--primary-purple);
+  color: var(--cyber-purple);
 }
 
 .comment-item {
@@ -753,7 +755,7 @@ body {
 
 .comment-author {
   font-weight: 700;
-  color: var(--primary-purple);
+  color: var(--cyber-purple);
   font-size: 14px;
 }
 
@@ -775,7 +777,7 @@ body {
 }
 
 .comment-delete:hover {
-  background: var(--danger-red);
+  background: var(--cyber-purple);
   color: white;
 }
 
@@ -804,7 +806,7 @@ body {
 }
 
 .comment-input:focus {
-  border-color: var(--primary-purple);
+  border-color: var(--cyber-purple);
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
@@ -814,7 +816,7 @@ body {
 
 .comment-submit {
   padding: 12px 20px;
-  background: var(--primary-purple);
+  background: var(--cyber-purple);
   color: white;
   border: none;
   border-radius: 24px;
@@ -827,7 +829,7 @@ body {
 }
 
 .comment-submit:hover:not(:disabled) {
-  background: var(--primary-purple-hover);
+  background: var(--cyber-purple-hover);
   transform: translateY(-1px);
 }
 
@@ -844,7 +846,7 @@ body {
 
 .comment-login-prompt button {
   padding: 12px 24px;
-  background: var(--primary-purple);
+  background: var(--cyber-purple);
   color: white;
   border: none;
   border-radius: 24px;
@@ -857,7 +859,7 @@ body {
 }
 
 .comment-login-prompt button:hover {
-  background: var(--primary-purple-hover);
+  background: var(--cyber-purple-hover);
   transform: translateY(-1px);
 }
 
@@ -920,9 +922,9 @@ body {
 }
 
 .modal-close:hover {
-  background: var(--danger-red);
+  background: var(--cyber-purple);
   color: white;
-  border-color: var(--danger-red);
+  border-color: var(--cyber-purple);
 }
 
 .modal-title {
@@ -930,7 +932,7 @@ body {
   font-weight: 800;
   margin-bottom: 24px;
   color: var(--text-primary);
-  background: linear-gradient(135deg, var(--primary-purple), var(--danger-red));
+  background: linear-gradient(135deg, var(--cyber-purple), var(--cyber-purple));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -954,7 +956,7 @@ body {
 }
 
 .form-input:focus {
-  border-color: var(--primary-purple);
+  border-color: var(--cyber-purple);
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
@@ -974,14 +976,14 @@ body {
 }
 
 .form-textarea:focus {
-  border-color: var(--primary-purple);
+  border-color: var(--cyber-purple);
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
 .form-button {
   width: 100%;
   padding: 16px 20px;
-  background: linear-gradient(135deg, var(--primary-purple), var(--primary-purple-hover));
+  background: linear-gradient(135deg, var(--cyber-purple), var(--cyber-purple-hover));
   color: white;
   border: none;
   border-radius: 16px;
@@ -1043,14 +1045,14 @@ body {
 }
 
 .main-form input:focus {
-  border-color: var(--primary-purple);
+  border-color: var(--cyber-purple);
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
 .main-form button {
   width: 100%;
   padding: 16px 20px;
-  background: var(--primary-purple);
+  background: var(--cyber-purple);
   color: white;
   border: none;
   border-radius: 12px;
@@ -1062,7 +1064,7 @@ body {
 }
 
 .main-form button:hover {
-  background: var(--primary-purple-hover);
+  background: var(--cyber-purple-hover);
   transform: translateY(-1px);
 }
 
@@ -1082,7 +1084,7 @@ body {
 .main-form-head button {
   background: none;
   border: none;
-  color: var(--primary-purple);
+  color: var(--cyber-purple);
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
@@ -1123,7 +1125,7 @@ body {
   padding: 16px 20px;
   color: var(--text-muted);
   font-size: 14px;
-  background: var(--surface);
+  background: var(--background);
   border-top: 1px solid var(--border);
 }
 
@@ -1146,7 +1148,7 @@ body {
   }
   
   .feed-image-container {
-    height: 60vh; /* Smaller on desktop */
+    height: 55vh; /* Smaller on desktop */
   }
   
   .fullscreen-image-container {
@@ -1217,18 +1219,18 @@ body {
 }
 
 .image-modal-close:hover {
-  background: var(--danger-red);
+  background: var(--cyber-purple);
   color: white;
-  border-color: var(--danger-red);
+  border-color: var(--cyber-purple);
 }
 
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 0px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--surface);
+  background: var(--foreground);
 }
 
 ::-webkit-scrollbar-thumb {
