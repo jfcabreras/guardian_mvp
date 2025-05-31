@@ -24,6 +24,7 @@ const Main = ({ setSelectedSection, user }) => {
   const [showNewReportModal, setShowNewReportModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
+  const [currentReportIndex, setCurrentReportIndex] = useState(0);
   const [showReportDetails, setShowReportDetails] = useState(false);
   const [message, setMessage] = useState('');
   const [file, setFile] = useState(null);
@@ -32,6 +33,9 @@ const Main = ({ setSelectedSection, user }) => {
   const [expandedComments, setExpandedComments] = useState({});
   const [commentInputs, setCommentInputs] = useState({});
   const fileInputRef = useRef(null);
+  const fullscreenRef = useRef(null);
+  const touchStartY = useRef(null);
+  const isScrolling = useRef(false);
 
   // Fetch reports on mount
   useEffect(() => {
@@ -199,6 +203,8 @@ const Main = ({ setSelectedSection, user }) => {
 
   // Open image in full screen modal
   const openFullScreenImage = (report) => {
+    const reportIndex = reports.findIndex(r => r.id === report.id);
+    setCurrentReportIndex(reportIndex);
     setSelectedReport(report);
     setShowImageModal(true);
     setShowReportDetails(false);
@@ -209,6 +215,82 @@ const Main = ({ setSelectedSection, user }) => {
     setShowImageModal(false);
     setSelectedReport(null);
     setShowReportDetails(false);
+  };
+
+  // Navigate to next report in full screen
+  const navigateToNextReport = () => {
+    if (currentReportIndex < reports.length - 1) {
+      const nextIndex = currentReportIndex + 1;
+      setCurrentReportIndex(nextIndex);
+      setSelectedReport(reports[nextIndex]);
+      setShowReportDetails(false);
+    }
+  };
+
+  // Navigate to previous report in full screen
+  const navigateToPreviousReport = () => {
+    if (currentReportIndex > 0) {
+      const prevIndex = currentReportIndex - 1;
+      setCurrentReportIndex(prevIndex);
+      setSelectedReport(reports[prevIndex]);
+      setShowReportDetails(false);
+    }
+  };
+
+  // Handle touch events for scroll navigation
+  const handleTouchStart = (e) => {
+    if (showReportDetails) return;
+    touchStartY.current = e.touches[0].clientY;
+    isScrolling.current = false;
+  };
+
+  const handleTouchMove = (e) => {
+    if (showReportDetails || !touchStartY.current || isScrolling.current) return;
+    
+    const touchY = e.touches[0].clientY;
+    const deltaY = touchStartY.current - touchY;
+    
+    // Threshold for scroll detection (50px)
+    if (Math.abs(deltaY) > 50) {
+      isScrolling.current = true;
+      
+      if (deltaY > 0) {
+        // Scrolling up - next report
+        navigateToNextReport();
+      } else {
+        // Scrolling down - previous report
+        navigateToPreviousReport();
+      }
+      
+      touchStartY.current = null;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    touchStartY.current = null;
+    setTimeout(() => {
+      isScrolling.current = false;
+    }, 100);
+  };
+
+  // Handle wheel events for desktop scroll navigation
+  const handleWheel = (e) => {
+    if (showReportDetails || isScrolling.current) return;
+    
+    e.preventDefault();
+    isScrolling.current = true;
+    
+    if (e.deltaY > 0) {
+      // Scrolling down - next report
+      navigateToNextReport();
+    } else {
+      // Scrolling up - previous report
+      navigateToPreviousReport();
+    }
+    
+    setTimeout(() => {
+      isScrolling.current = false;
+    }, 300);
   };
 
   const handleOpenModal = () => {
@@ -338,11 +420,33 @@ const Main = ({ setSelectedSection, user }) => {
 
       {/* Full Screen Image Modal */}
       {showImageModal && selectedReport && (
-        <div className="fullscreen-modal">
+        <div 
+          className="fullscreen-modal"
+          ref={fullscreenRef}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onWheel={handleWheel}
+        >
           <button className="fullscreen-close" onClick={closeFullScreenModal}>×</button>
+          
+          {/* Navigation indicators */}
+          <div className="fullscreen-nav-indicators">
+            <div className="nav-indicator">
+              {currentReportIndex + 1} / {reports.length}
+            </div>
+            {currentReportIndex > 0 && (
+              <div className="nav-hint nav-hint-up">↑ Swipe up for previous</div>
+            )}
+            {currentReportIndex < reports.length - 1 && (
+              <div className="nav-hint nav-hint-down">↓ Swipe down for next</div>
+            )}
+          </div>
+
           <div className="fullscreen-image-container">
             {selectedReport.filename?.match(/\.(mp4|webm|ogg)$/i) ? (
               <video
+                key={selectedReport.id} // Force re-render only when report changes
                 src={selectedReport.fileUrl}
                 className="fullscreen-image"
                 controls
@@ -351,6 +455,7 @@ const Main = ({ setSelectedSection, user }) => {
               />
             ) : (
               <img
+                key={selectedReport.id} // Force re-render only when report changes
                 src={selectedReport.fileUrl}
                 alt="Full size"
                 className="fullscreen-image"
