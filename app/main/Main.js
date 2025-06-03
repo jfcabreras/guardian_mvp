@@ -596,7 +596,8 @@ const Main = ({ setSelectedSection, user }) => {
                     </div>
                     <span className="report-status-full">🔴 ACTIVE INCIDENT</span>
                   </div>
-                  <h3 className="report-message-full">{selectedReport.message}</h3></div>
+                  <h3 className="report-message-full">{selectedReport.message}</h3>
+                </div>
 
                   {/* Report Type Info */}
                   <div className="report-type-info">
