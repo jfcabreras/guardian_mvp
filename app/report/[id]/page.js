@@ -1,13 +1,31 @@
 
-'use client';
-
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import Main from '../../main/Main';
 
-const ReportPage = () => {
+// Server-side function for static generation
+export async function generateStaticParams() {
+  try {
+    const reportsSnapshot = await getDocs(collection(db, "reports"));
+    const paths = reportsSnapshot.docs.map((doc) => ({
+      id: doc.id,
+    }));
+    
+    return paths;
+  } catch (error) {
+    console.error("Error generating static params:", error);
+    // Return empty array if Firebase is not accessible during build
+    return [];
+  }
+}
+
+// Client component
+function ReportPageClient() {
+
+'use client';
+  
   const params = useParams();
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -136,6 +154,9 @@ const ReportPage = () => {
       </div>
     </div>
   );
-};
+}
 
-export default ReportPage;
+// Default export as client component
+export default function ReportPage() {
+  return <ReportPageClient />;
+}
