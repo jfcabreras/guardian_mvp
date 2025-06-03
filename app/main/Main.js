@@ -21,6 +21,7 @@ import { v4 as uuidv4 } from 'uuid';
 const Main = ({ setSelectedSection, user }) => {
   const currentUserUid = auth.currentUser?.uid;
   const [reports, setReports] = useState([]);
+  const [filteredReports, setFilteredReports] = useState([]);
   const [showNewReportModal, setShowNewReportModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
@@ -32,15 +33,23 @@ const Main = ({ setSelectedSection, user }) => {
   const [location, setLocation] = useState(null);
   const [expandedComments, setExpandedComments] = useState({});
   const [commentInputs, setCommentInputs] = useState({});
+  const [reportType, setReportType] = useState('problem');
+  const [selectedProblems, setSelectedProblems] = useState([]);
+  const [collaborators, setCollaborators] = useState([]);
+  const [collaboratorEmail, setCollaboratorEmail] = useState('');
+  const [filterType, setFilterType] = useState('all');
+  const [problemReports, setProblemReports] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
   const fileInputRef = useRef(null);
   const fullscreenRef = useRef(null);
   const touchStartY = useRef(null);
   const isScrolling = useRef(false);
 
-  // Fetch reports on mount
+  // Fetch reports and users on mount
   useEffect(() => {
-    const fetchReports = async () => {
+    const fetchData = async () => {
       try {
+        // Fetch reports
         const q = query(collection(db, "reports"), orderBy("timestamp", "desc"));
         const snapshot = await getDocs(q);
         const j_reports = snapshot.docs.map(doc => ({
@@ -48,12 +57,33 @@ const Main = ({ setSelectedSection, user }) => {
           ...doc.data()
         }));
         setReports(j_reports);
+        setFilteredReports(j_reports);
+        setProblemReports(j_reports.filter(report => report.reportType === 'problem'));
+
+        // Fetch users for collaborator selection
+        const usersSnapshot = await getDocs(collection(db, "users"));
+        const users = usersSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setAllUsers(users);
       } catch (error) {
-        console.error("Error fetching reports:", error);
+        console.error("Error fetching data:", error);
       }
     };
-    fetchReports();
+    fetchData();
   }, []);
+
+  // Filter reports based on type
+  useEffect(() => {
+    let filtered = reports;
+    if (filterType === 'problem') {
+      filtered = reports.filter(report => report.reportType === 'problem');
+    } else if (filterType === 'solution') {
+      filtered = reports.filter(report => report.reportType === 'solution');
+    }
+    setFilteredReports(filtered);
+  }, [reports, filterType]);
 
   // Handle file input change - store in memory, preview locally
   const handleFileChange = (e) => {
@@ -92,38 +122,46 @@ const Main = ({ setSelectedSection, user }) => {
 
     try {
       const uploadedUrl = await uploadToStorage(file, 'files');
+      const reportId = uuidv4();
 
-      const newReport = await addDoc(collection(db, "reports"), {
+      const newReportData = {
         sender: currentUserUid,
+        senderEmail: user?.email,
         type: 'file',
+        reportType,
         message,
         fileUrl: uploadedUrl,
         filename: file.name,
         category: 'undefined',
         timestamp: serverTimestamp(),
         location,
-        comments: []
-      });
+        comments: [],
+        collaborators: collaborators,
+        linkedProblems: reportType === 'solution' ? selectedProblems : [],
+        reportId: reportId,
+        shareableLink: `${window.location.origin}/report/${reportId}`
+      };
+
+      const newReport = await addDoc(collection(db, "reports"), newReportData);
 
       // Add to local state immediately for better UX
-      setReports(prev => [{
+      const localReport = {
         id: newReport.id,
-        sender: currentUserUid,
-        type: 'file',
-        message,
-        fileUrl: uploadedUrl,
-        filename: file.name,
-        category: 'undefined',
-        timestamp: { toDate: () => new Date() },
-        location,
-        comments: []
-      }, ...prev]);
+        ...newReportData,
+        timestamp: { toDate: () => new Date() }
+      };
+
+      setReports(prev => [localReport, ...prev]);
 
       // Reset form
       setMessage('');
       setFile(null);
       setFilePreviewUrl('');
       setLocation(null);
+      setReportType('problem');
+      setSelectedProblems([]);
+      setCollaborators([]);
+      setCollaboratorEmail('');
       setShowNewReportModal(false);
     } catch (error) {
       console.error("Error submitting report:", error);
@@ -199,6 +237,35 @@ const Main = ({ setSelectedSection, user }) => {
       ...prev,
       [reportId]: value
     }));
+  };
+
+  // Add collaborator
+  const addCollaborator = () => {
+    if (collaboratorEmail.trim() && !collaborators.includes(collaboratorEmail.trim())) {
+      setCollaborators(prev => [...prev, collaboratorEmail.trim()]);
+      setCollaboratorEmail('');
+    }
+  };
+
+  // Remove collaborator
+  const removeCollaborator = (email) => {
+    setCollaborators(prev => prev.filter(collab => collab !== email));
+  };
+
+  // Toggle problem selection for solution reports
+  const toggleProblemSelection = (problemId) => {
+    setSelectedProblems(prev => 
+      prev.includes(problemId) 
+        ? prev.filter(id => id !== problemId)
+        : [...prev, problemId]
+    );
+  };
+
+  // Copy share link
+  const copyShareLink = (report) => {
+    const link = report.shareableLink || `${window.location.origin}/report/${report.reportId || report.id}`;
+    navigator.clipboard.writeText(link);
+    alert('Link copied to clipboard!');
   };
 
   // Open image in full screen modal
@@ -299,15 +366,37 @@ const Main = ({ setSelectedSection, user }) => {
 
   return (
     <div className="main-section">
+      {/* Filter Buttons */}
+      <div className="filter-section">
+        <button 
+          className={`filter-btn ${filterType === 'all' ? 'active' : ''}`}
+          onClick={() => setFilterType('all')}
+        >
+          All Reports
+        </button>
+        <button 
+          className={`filter-btn ${filterType === 'problem' ? 'active' : ''}`}
+          onClick={() => setFilterType('problem')}
+        >
+          Problems
+        </button>
+        <button 
+          className={`filter-btn ${filterType === 'solution' ? 'active' : ''}`}
+          onClick={() => setFilterType('solution')}
+        >
+          Solutions
+        </button>
+      </div>
+
       <div className='report-feed'>
-        {reports.length < 1 ? (
+        {filteredReports.length < 1 ? (
           <div className="empty-state">
             <div className="empty-state-icon">📱</div>
             <h3>No Reports Yet</h3>
             <p>Be the first to report something in your area</p>
           </div>
         ) : (
-          reports.map((report) => (
+          filteredReports.map((report) => (
             <div key={report.id} className="feed-item">
               <div className="feed-image-container" onClick={() => openFullScreenImage(report)}>
                 {report.filename?.match(/\.(mp4|webm|ogg)$/i) ? (
@@ -329,7 +418,9 @@ const Main = ({ setSelectedSection, user }) => {
                   />
                 )}
                 <div className="feed-overlay">
-                  {/* <div className="feed-status">🔴 ACTIVE</div> */}
+                  <div className={`feed-type ${report.reportType || 'problem'}`}>
+                    {report.reportType === 'solution' ? '💡 SOLUTION' : '🚨 PROBLEM'}
+                  </div>
                   <div className="feed-time">
                     {report.timestamp?.toDate ? report.timestamp.toDate().toLocaleString() : 'Just now'}
                   </div>
@@ -344,9 +435,12 @@ const Main = ({ setSelectedSection, user }) => {
                   >
                     💬 {report.comments?.length || 0}
                   </button>
-                  {/* <button className="feed-action-btn">
-                    🚨 Alert
-                  </button> */}
+                  <button 
+                    className="feed-action-btn"
+                    onClick={() => copyShareLink(report)}
+                  >
+                    🔗 Share
+                  </button>
                   <button className="feed-action-btn">
                     📍 Location
                   </button>
@@ -484,6 +578,52 @@ const Main = ({ setSelectedSection, user }) => {
                     <span className="report-status-full">🔴 ACTIVE INCIDENT</span>
                   </div>
                   <h3 className="report-message-full">{selectedReport.message}</h3>
+
+                  {/* Report Type Info */}
+                  <div className="report-type-info">
+                    <span className={`report-type-badge ${selectedReport.reportType || 'problem'}`}>
+                      {selectedReport.reportType === 'solution' ? '💡 Solution' : '🚨 Problem'}
+                    </span>
+                  </div>
+
+                  {/* Collaborators */}
+                  {selectedReport.collaborators && selectedReport.collaborators.length > 0 && (
+                    <div className="collaborators-section">
+                      <h4>Collaborators</h4>
+                      <div className="collaborators-list">
+                        {selectedReport.collaborators.map(email => (
+                          <span key={email} className="collaborator-tag">{email}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Linked Problems */}
+                  {selectedReport.linkedProblems && selectedReport.linkedProblems.length > 0 && (
+                    <div className="linked-problems-section">
+                      <h4>Solves These Problems</h4>
+                      <div className="linked-problems-list">
+                        {selectedReport.linkedProblems.map(problemId => {
+                          const problem = reports.find(r => r.id === problemId);
+                          return problem ? (
+                            <div key={problemId} className="linked-problem-item">
+                              <span>🚨 {problem.message.substring(0, 80)}...</span>
+                            </div>
+                          ) : null;
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Share Link */}
+                  <div className="share-section">
+                    <button 
+                      className="share-btn"
+                      onClick={() => copyShareLink(selectedReport)}
+                    >
+                      🔗 Copy Share Link
+                    </button>
+                  </div>
                   
                   {/* All Comments */}
                   <div className="comments-section-full">
@@ -552,7 +692,96 @@ const Main = ({ setSelectedSection, user }) => {
         <div className="modal-overlay" onClick={() => setShowNewReportModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setShowNewReportModal(false)}>×</button>
-            <h3 className="modal-title">Report Incident</h3>
+            <h3 className="modal-title">Create Report</h3>
+
+            {/* Report Type Selection */}
+            <div className="form-group">
+              <label className="form-label">Report Type</label>
+              <div className="report-type-selection">
+                <button
+                  type="button"
+                  className={`type-btn ${reportType === 'problem' ? 'active' : ''}`}
+                  onClick={() => setReportType('problem')}
+                >
+                  🚨 Problem
+                </button>
+                <button
+                  type="button"
+                  className={`type-btn ${reportType === 'solution' ? 'active' : ''}`}
+                  onClick={() => setReportType('solution')}
+                >
+                  💡 Solution
+                </button>
+              </div>
+            </div>
+
+            {/* Link to Problems (only for solutions) */}
+            {reportType === 'solution' && problemReports.length > 0 && (
+              <div className="form-group">
+                <label className="form-label">Link to Problems (Optional)</label>
+                <div className="problem-selection">
+                  {problemReports.map(problem => (
+                    <div key={problem.id} className="problem-item">
+                      <input
+                        type="checkbox"
+                        id={`problem-${problem.id}`}
+                        checked={selectedProblems.includes(problem.id)}
+                        onChange={() => toggleProblemSelection(problem.id)}
+                      />
+                      <label htmlFor={`problem-${problem.id}`} className="problem-label">
+                        {problem.message.substring(0, 60)}...
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Collaborators (only for solutions) */}
+            {reportType === 'solution' && (
+              <div className="form-group">
+                <label className="form-label">Collaborators (Optional)</label>
+                <div className="collaborator-input">
+                  <input
+                    type="email"
+                    placeholder="Enter collaborator email"
+                    value={collaboratorEmail}
+                    onChange={(e) => setCollaboratorEmail(e.target.value)}
+                    className="form-input"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addCollaborator();
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={addCollaborator}
+                    className="add-collaborator-btn"
+                    disabled={!collaboratorEmail.trim()}
+                  >
+                    Add
+                  </button>
+                </div>
+                {collaborators.length > 0 && (
+                  <div className="collaborator-list">
+                    {collaborators.map(email => (
+                      <div key={email} className="collaborator-item">
+                        <span>{email}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeCollaborator(email)}
+                          className="remove-collaborator-btn"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Local Preview */}
             {filePreviewUrl && (
@@ -579,7 +808,11 @@ const Main = ({ setSelectedSection, user }) => {
               </div>
               <div className="form-group">
                 <textarea
-                  placeholder="What's happening? Describe the incident..."
+                  placeholder={
+                    reportType === 'problem' 
+                      ? "What's the problem? Describe the issue..." 
+                      : "How does this solve the problem? Describe your solution..."
+                  }
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   className="form-textarea"
