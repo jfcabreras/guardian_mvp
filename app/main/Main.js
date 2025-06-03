@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
@@ -206,7 +205,7 @@ const Main = ({ setSelectedSection, user }) => {
     try {
       const report = reports.find(r => r.id === reportId);
       const updatedComments = report.comments.filter(comment => comment.id !== commentId);
-      
+
       const reportRef = doc(db, "reports", reportId);
       await updateDoc(reportRef, {
         comments: updatedComments
@@ -313,14 +312,14 @@ const Main = ({ setSelectedSection, user }) => {
 
   const handleTouchMove = (e) => {
     if (showReportDetails || !touchStartY.current || isScrolling.current) return;
-    
+
     const touchY = e.touches[0].clientY;
     const deltaY = touchStartY.current - touchY;
-    
+
     // Threshold for scroll detection (50px)
     if (Math.abs(deltaY) > 50) {
       isScrolling.current = true;
-      
+
       if (deltaY > 0) {
         // Scrolling up - next report
         navigateToNextReport();
@@ -328,7 +327,7 @@ const Main = ({ setSelectedSection, user }) => {
         // Scrolling down - previous report
         navigateToPreviousReport();
       }
-      
+
       touchStartY.current = null;
     }
   };
@@ -343,10 +342,10 @@ const Main = ({ setSelectedSection, user }) => {
   // Handle wheel events for desktop scroll navigation
   const handleWheel = (e) => {
     if (showReportDetails || isScrolling.current) return;
-    
+
     e.preventDefault();
     isScrolling.current = true;
-    
+
     if (e.deltaY > 0) {
       // Scrolling down - next report
       navigateToNextReport();
@@ -354,7 +353,7 @@ const Main = ({ setSelectedSection, user }) => {
       // Scrolling up - previous report
       navigateToPreviousReport();
     }
-    
+
     setTimeout(() => {
       isScrolling.current = false;
     }, 300);
@@ -453,7 +452,7 @@ const Main = ({ setSelectedSection, user }) => {
                     📍 Location
                   </button>
                 </div>
-                
+
                 {/* Compact Comments */}
                 {expandedComments[report.id] && (
                   <div className="feed-comments">
@@ -471,7 +470,7 @@ const Main = ({ setSelectedSection, user }) => {
                         )}
                       </div>
                     ))}
-                    
+
                     {report.comments?.length > 2 && (
                       <button 
                         className="feed-view-more"
@@ -531,7 +530,7 @@ const Main = ({ setSelectedSection, user }) => {
           onWheel={handleWheel}
         >
           <button className="fullscreen-close" onClick={closeFullScreenModal}>×</button>
-          
+
           {/* Navigation indicators */}
           <div className="fullscreen-nav-indicators">
             <div className="nav-indicator">
@@ -564,10 +563,10 @@ const Main = ({ setSelectedSection, user }) => {
               />
             )}
           </div>
-          
+
           {/* Report Details Tab */}
           <div className={`report-details-tab ${showReportDetails ? 'expanded' : ''}`}>
-            <div className="tab-handle" onClick={() => setShowReportDetails(!showReportDetails)}>
+            <div className="tab-handle" onClick={()={() => setShowReportDetails(!showReportDetails)}}>
               <div className="tab-indicator"></div>
               <div className="tab-preview">
                 <h4>{selectedReport.message}</h4>
@@ -575,7 +574,7 @@ const Main = ({ setSelectedSection, user }) => {
               </div>
               <div className="tab-arrow">{showReportDetails ? '▼' : '▲'}</div>
             </div>
-            
+
             {showReportDetails && (
               <div className="tab-content">
                 <div className="report-full-details">
@@ -644,7 +643,7 @@ const Main = ({ setSelectedSection, user }) => {
                       🔗 Copy Share Link
                     </button>
                   </div>
-                  
+
                   {/* All Comments */}
                   <div className="comments-section-full">
                     <h4>Comments ({selectedReport.comments?.length || 0})</h4>
@@ -667,7 +666,7 @@ const Main = ({ setSelectedSection, user }) => {
                         <p className="comment-text-full">{comment.text}</p>
                       </div>
                     ))}
-                    
+
                     {user?.emailVerified ? (
                       <div className="comment-form-full">
                         <input
