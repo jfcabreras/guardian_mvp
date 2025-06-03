@@ -1,0 +1,23 @@
+Error: ./app/main/Main.js:569:50
+Parsing ecmascript source code failed
+[0m [90m 567 |[39m           {[90m/* Report Details Tab */[39m}[0m
+[0m [90m 568 |[39m           [33m<[39m[33mdiv[39m className[33m=[39m{[32m`report-details-tab ${showReportDetails ? 'expanded' : ''}`[39m}[33m>[39m[0m
+[0m[31m[1m>[22m[39m[90m 569 |[39m             [33m<[39m[33mdiv[39m className[33m=[39m[32m"tab-handle"[39m onClick[33m=[39m{()[33m=[39m{() [33m=>[39m setShowReportDetails([33m![39mshowReportDetails)}}[33m>[39m[0m
+[0m [90m     |[39m                                                  [31m[1m^[22m[39m[31m[1m^[22m[39m[0m
+[0m [90m 570 |[39m               [33m<[39m[33mdiv[39m className[33m=[39m[32m"tab-indicator"[39m[33m>[39m[33m<[39m[33m/[39m[33mdiv[39m[33m>[39m[0m
+[0m [90m 571 |[39m               [33m<[39m[33mdiv[39m className[33m=[39m[32m"tab-preview"[39m[33m>[39m[0m
+[0m [90m 572 |[39m                 [33m<[39m[33mh4[39m[33m>[39m{selectedReport[33m.[39mmessage}[33m<[39m[33m/[39m[33mh4[39m[33m>[39m[0m
+
+Parenthesized expression cannot be empty
+    at BuildError (https://4a65d6e1-37fe-43a7-8222-c898ffd8ae36-00-2tbo6wg13flvi.worf.replit.dev/_next/static/chunks/%5Broot-of-the-server%5D__e2c08166._.js:17395:41)
+    at react-stack-bottom-frame (https://4a65d6e1-37fe-43a7-8222-c898ffd8ae36-00-2tbo6wg13flvi.worf.replit.dev/_next/static/chunks/node_modules_react-dom_82bb97c6._.js:13596:24)
+    at renderWithHooks (https://4a65d6e1-37fe-43a7-8222-c898ffd8ae36-00-2tbo6wg13flvi.worf.replit.dev/_next/static/chunks/node_modules_react-dom_82bb97c6._.js:3560:24)
+    at updateFunctionComponent (https://4a65d6e1-37fe-43a7-8222-c898ffd8ae36-00-2tbo6wg13flvi.worf.replit.dev/_next/static/chunks/node_modules_react-dom_82bb97c6._.js:5317:21)
+    at beginWork (https://4a65d6e1-37fe-43a7-8222-c898ffd8ae36-00-2tbo6wg13flvi.worf.replit.dev/_next/static/chunks/node_modules_react-dom_82bb97c6._.js:5916:24)
+    at runWithFiberInDEV (https://4a65d6e1-37fe-43a7-8222-c898ffd8ae36-00-2tbo6wg13flvi.worf.replit.dev/_next/static/chunks/node_modules_react-dom_82bb97c6._.js:1335:74)
+    at performUnitOfWork (https://4a65d6e1-37fe-43a7-8222-c898ffd8ae36-00-2tbo6wg13flvi.worf.replit.dev/_next/static/chunks/node_modules_react-dom_82bb97c6._.js:7988:97)
+    at workLoopSync (https://4a65d6e1-37fe-43a7-8222-c898ffd8ae36-00-2tbo6wg13flvi.worf.replit.dev/_next/static/chunks/node_modules_react-dom_82bb97c6._.js:7880:40)
+    at renderRootSync (https://4a65d6e1-37fe-43a7-8222-c898ffd8ae36-00-2tbo6wg13flvi.worf.replit.dev/_next/static/chunks/node_modules_react-dom_82bb97c6._.js:7863:13)
+    at performWorkOnRoot (https://4a65d6e1-37fe-43a7-8222-c898ffd8ae36-00-2tbo6wg13flvi.worf.replit.dev/_next/static/chunks/node_modules_react-dom_82bb97c6._.js:7602:212)
+    at performWorkOnRootViaSchedulerTask (https://4a65d6e1-37fe-43a7-8222-c898ffd8ae36-00-2tbo6wg13flvi.worf.replit.dev/_next/static/chunks/node_modules_react-dom_82bb97c6._.js:8566:9)
+    at MessagePort.performWorkUntilDeadline (https://4a65d6e1-37fe-43a7-8222-c898ffd8ae36-00-2tbo6wg13flvi.worf.replit.dev/_next/static/chunks/node_modules_a51498a5._.js:1119:64)
