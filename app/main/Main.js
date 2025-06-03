@@ -436,7 +436,7 @@ const Main = ({ setSelectedSection, user }) => {
                   </button>
                 </div>
                 <h3 className="feed-message">{report.message}</h3>
-                <div className="feed-actions"></div>
+                <div className="feed-actions">
                   <button 
                     className="feed-action-btn"
                     onClick={() => toggleComments(report.id)}
