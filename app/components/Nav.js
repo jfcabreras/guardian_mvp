@@ -16,8 +16,14 @@ const Nav = ({ setSelectedSection, handleLogout, user}) => {
       </div>
       {user && 
         <div className="navigation-options">
-          <button onClick={() => handleSectionChange('messages')}>💬 Messages</button>
-          <button onClick={() => handleSectionChange('profile')}>👤 Profile</button>
+          {/* Uncomment and customize the navigation buttons as needed */}
+          {/* 
+          <button onClick={() => handleSectionChange('main')}>Inicio</button>
+          <button onClick={() => handleSectionChange('contribute')}>Apóyanos</button>
+          <button onClick={() => handleSectionChange('login')}>Ingresar</button>
+          <button onClick={() => handleSectionChange('signin')}>Registro</button>
+          <button onClick={() => handleSectionChange('profile')}>Mi Perfíl</button>
+          */}
           <button onClick={handleLogout}>Salir</button>
         </div>
       }
