@@ -3,25 +3,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import Main from '../../main/Main';
-
-// Required for static export
-export async function generateStaticParams() {
-  try {
-    const reportsSnapshot = await getDocs(collection(db, "reports"));
-    const paths = reportsSnapshot.docs.map((doc) => ({
-      id: doc.id,
-    }));
-    
-    return paths;
-  } catch (error) {
-    console.error("Error generating static params:", error);
-    // Return empty array if Firebase is not accessible during build
-    return [];
-  }
-}
 
 const ReportPage = () => {
   const params = useParams();
