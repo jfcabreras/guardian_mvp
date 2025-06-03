@@ -108,6 +108,47 @@ body {
   transform: translateY(-1px);
 }
 
+/* Filter Controls */
+.filter-controls {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  background: var(--surface-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-btn:hover {
+  background: var(--surface);
+  border-color: var(--border-light);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.filter-btn.active {
+  background: var(--cyber-purple);
+  border-color: var(--cyber-purple);
+  color: white;
+  box-shadow: var(--shadow);
+}
+
 /* Main Content */
 .main {
   flex: 1;

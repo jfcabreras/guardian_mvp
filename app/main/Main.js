@@ -21,7 +21,7 @@ import {
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
 
-const Main = ({ setSelectedSection, user }) => {
+const Main = ({ setSelectedSection, user, setProfileUserId }) => {
   const router = useRouter();
   const currentUserUid = auth.currentUser?.uid;
   const [reports, setReports] = useState([]);
@@ -232,7 +232,10 @@ const Main = ({ setSelectedSection, user }) => {
 
   // Navigate to user profile
   const navigateToProfile = (userId) => {
-    router.push(`/profile/${userId}`);
+    if (setProfileUserId) {
+      setProfileUserId(userId);
+    }
+    setSelectedSection('profile');
   };
 
   // Add collaborator

@@ -17,18 +17,18 @@ import { doc, setDoc } from "firebase/firestore";
 export default function Home() {
   const router = useRouter();
 
-  const [showLoginModal, setShowLoginModal] = useState(false);
-
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [selectedSection, setSelectedSection] = useState('main');
+  const [profileUserId, setProfileUserId] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [lastName, setLastName] = useState('');
   const [isLogin, setIsLogin] = useState(true);
-  const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [user, setUser] = useState(null);
   const [forgotPassword, setForgotPassword] = useState(false);
 
   useEffect(() => {
@@ -143,15 +143,15 @@ export default function Home() {
     const renderSection = () => {
       switch (selectedSection) {
         case 'main':
-          return <Main router={router} setSelectedSection={setSelectedSection} user={user}/>;
+          return <Main router={router} setSelectedSection={setSelectedSection} user={user} profileUserId={profileUserId}/>;
         case 'contribute':
           return <Contribute setSelectedSection={setSelectedSection} />;
         case 'login':
           setShowLoginModal(true);
           setSelectedSection('main');
-          return <Main router={router} setSelectedSection={setSelectedSection} user={user}/>;
+          return <Main router={router} setSelectedSection={setSelectedSection} user={user} profileUserId={profileUserId}/>;
         default:
-          return <Main router={router} setSelectedSection={setSelectedSection} user={user}/>;
+          return <Main router={router} setSelectedSection={setSelectedSection} user={user} profileUserId={profileUserId}/>;
       }
     };
 
