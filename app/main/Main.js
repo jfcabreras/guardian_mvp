@@ -701,7 +701,6 @@ const Main = ({ setSelectedSection, user }) => {
                     )}
                   </div>
                 </div>
-              </div>
             )}
           </div>
         </div>
