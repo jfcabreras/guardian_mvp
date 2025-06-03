@@ -566,7 +566,7 @@ const Main = ({ setSelectedSection, user }) => {
 
           {/* Report Details Tab */}
           <div className={`report-details-tab ${showReportDetails ? 'expanded' : ''}`}>
-            <div className="tab-handle" onClick={()={() => setShowReportDetails(!showReportDetails)}}>
+            <div className="tab-handle" onClick={() => setShowReportDetails(!showReportDetails)}>
               <div className="tab-indicator"></div>
               <div className="tab-preview">
                 <h4>{selectedReport.message}</h4>
