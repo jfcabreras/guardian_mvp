@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 
 import Main from './main/Main';
 import Contribute from './contribute/page';
+import Profile from './profile/Profile';
+import Messages from './messages/Messages';
 
 import { auth, db } from '../lib/firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendEmailVerification, sendPasswordResetEmail } from 'firebase/auth';
@@ -143,15 +145,19 @@ export default function Home() {
     const renderSection = () => {
       switch (selectedSection) {
         case 'main':
-          return <Main router={router} setSelectedSection={setSelectedSection} user={user} profileUserId={profileUserId}/>;
+          return <Main router={router} setSelectedSection={setSelectedSection} user={user} profileUserId={profileUserId} setProfileUserId={setProfileUserId}/>;
         case 'contribute':
           return <Contribute setSelectedSection={setSelectedSection} />;
+        case 'profile':
+          return <Profile userId={profileUserId} setSelectedSection={setSelectedSection} />;
+        case 'messages':
+          return <Messages setSelectedSection={setSelectedSection} />;
         case 'login':
           setShowLoginModal(true);
           setSelectedSection('main');
-          return <Main router={router} setSelectedSection={setSelectedSection} user={user} profileUserId={profileUserId}/>;
+          return <Main router={router} setSelectedSection={setSelectedSection} user={user} profileUserId={profileUserId} setProfileUserId={setProfileUserId}/>;
         default:
-          return <Main router={router} setSelectedSection={setSelectedSection} user={user} profileUserId={profileUserId}/>;
+          return <Main router={router} setSelectedSection={setSelectedSection} user={user} profileUserId={profileUserId} setProfileUserId={setProfileUserId}/>;
       }
     };
 
