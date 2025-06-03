@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 
 import Main from './main/Main';
 import Contribute from './contribute/page';
+import Messages from './messages/Messages';
+import Profile from './profile/Profile';
 
 import { auth, db } from '../lib/firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendEmailVerification, sendPasswordResetEmail } from 'firebase/auth';
@@ -139,6 +141,14 @@ export default function Home() {
     }
   };
 
+  const handleSectionChange = (section) => {
+    setSelectedSection(section);
+  };
+
+  // Check if we're navigating to a specific user's profile
+  const isProfileSection = selectedSection?.startsWith('profile-');
+  const targetUserId = isProfileSection ? selectedSection.replace('profile-', '') : null;
+
   const renderSelectedSection = () => {
     const renderSection = () => {
       switch (selectedSection) {
@@ -181,7 +191,13 @@ export default function Home() {
             </button>
           </div>
         )}
-        {renderSection()}
+        {(selectedSection === 'profile' || isProfileSection) && (
+          <Profile 
+            setSelectedSection={setSelectedSection} 
+            targetUserId={targetUserId}
+          />
+        )}
+        {selectedSection === 'messages' && <Messages setSelectedSection={setSelectedSection} user={user} />}
       </>
     );
   };

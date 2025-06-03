@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { auth, db } from '../../lib/firebase';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, addDoc } from 'firebase/firestore';
 
 const Profile = ({ setSelectedSection, targetUserId = null }) => {
   const currentUserUid = auth.currentUser?.uid;
@@ -56,11 +56,56 @@ const Profile = ({ setSelectedSection, targetUserId = null }) => {
     }
   };
 
-  const handleSendMessage = () => {
-    // Implement direct messaging functionality
-    console.log('Send message:', messageText);
-    setShowMessageModal(false);
-    setMessageText('');
+  const handleSendMessage = async () => {
+    if (!messageText.trim()) return;
+
+    try {
+      // Check if conversation already exists
+      const conversationQuery = query(
+        collection(db, "conversations"),
+        where("participants", "array-contains", currentUserUid)
+      );
+      const conversationSnapshot = await getDocs(conversationQuery);
+      
+      let conversationId = null;
+      const existingConv = conversationSnapshot.docs.find(doc => 
+        doc.data().participants.includes(profileUserId)
+      );
+
+      if (existingConv) {
+        conversationId = existingConv.id;
+      } else {
+        // Create new conversation
+        const newConversation = await addDoc(collection(db, "conversations"), {
+          participants: [currentUserUid, profileUserId],
+          participantEmails: [auth.currentUser?.email, userInfo?.email],
+          createdAt: new Date(),
+          lastMessage: messageText.trim(),
+          lastMessageTime: new Date()
+        });
+        conversationId = newConversation.id;
+      }
+
+      // Send the message
+      await addDoc(collection(db, "messages"), {
+        conversationId,
+        senderId: currentUserUid,
+        senderEmail: auth.currentUser?.email,
+        text: messageText.trim(),
+        timestamp: new Date(),
+        read: false
+      });
+
+      setShowMessageModal(false);
+      setMessageText('');
+      alert('Message sent successfully!');
+      
+      // Navigate to messages section
+      setSelectedSection('messages');
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert('Failed to send message. Please try again.');
+    }
   };
 
   const copyProfileLink = () => {

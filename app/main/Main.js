@@ -427,8 +427,16 @@ const Main = ({ setSelectedSection, user }) => {
                 </div>
               </div>
               <div className="feed-content">
+                <div className="feed-author">
+                  <button 
+                    className="author-name-btn"
+                    onClick={() => setSelectedSection(`profile-${report.sender}`)}
+                  >
+                    👤 {report.senderEmail || 'Anonymous'}
+                  </button>
+                </div>
                 <h3 className="feed-message">{report.message}</h3>
-                <div className="feed-actions">
+                <div className="feed-actions"></div>
                   <button 
                     className="feed-action-btn"
                     onClick={() => toggleComments(report.id)}
@@ -572,12 +580,23 @@ const Main = ({ setSelectedSection, user }) => {
               <div className="tab-content">
                 <div className="report-full-details">
                   <div className="report-meta">
+                    <div className="report-author-full">
+                      <button 
+                        className="author-name-btn-full"
+                        onClick={() => {
+                          setSelectedSection(`profile-${selectedReport.sender}`);
+                          closeFullScreenModal();
+                        }}
+                      >
+                        👤 {selectedReport.senderEmail || 'Anonymous'}
+                      </button>
+                    </div>
                     <div className="report-timestamp">
                       {selectedReport.timestamp?.toDate ? selectedReport.timestamp.toDate().toLocaleString() : 'Just now'}
                     </div>
                     <span className="report-status-full">🔴 ACTIVE INCIDENT</span>
                   </div>
-                  <h3 className="report-message-full">{selectedReport.message}</h3>
+                  <h3 className="report-message-full">{selectedReport.message}</h3></div>
 
                   {/* Report Type Info */}
                   <div className="report-type-info">
